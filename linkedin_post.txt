@@ -1,0 +1,38 @@
+# Option 1: High-Engagement Quant Deep-Dive (Recommended)
+
+Can simple mathematical models like Geometric Brownian Motion (GBM) survive real-world markets?
+
+GBM is simple, elegant, and the mathematical foundation of Black-Scholes. 
+Constant drift, constant volatility, and independent, normally distributed log returns.
+
+Assumptions real equity markets routinely shatter.
+
+I tested this against nearly 30 years of daily BSE SENSEX data (1997–2026, 7,216 trading days).
+
+Here is what the math revealed:
+
+1. The Long-Run Horizon Paradox:
+Over nearly three decades, as the SENSEX compounded from ~4,300 to over 74,700 points, the actual realized trajectory sat comfortably inside the 5%–95% GBM confidence cone. GBM roughly holds for long-run geometric compounded growth.
+
+2. The Daily Tail Failure:
+At the daily scale, Gaussian normality completely disintegrates:
+• 4σ Black Swan Days: 45 observed vs 0.46 expected under GBM (a ~100x discrepancy).
+• Worst single day: -14.10% (realized as a -9.8σ event).
+• Excess Kurtosis: 8.76 (Normal Gaussian is 0.00).
+
+3. Fat Tails vs. Volatility Clustering:
+When you scale daily returns by conditional volatility using a GARCH(1,1) model, excess kurtosis collapses from 8.76 down to 2.07 (-57%).
+This proves that "fat tails" and "volatility clustering" are largely two perspectives of the same underlying dynamic.
+
+4. The Power-Law Fit:
+Fitting a Student-t distribution via MLE yields a shape parameter of ν ≈ 3.11, fitting empirical market returns far better than the Gaussian bell curve.
+
+My takeaway:
+You don’t study GBM because markets follow it.
+You study it because it is the baseline against which you spend your career measuring how they don't.
+
+What are your thoughts—do you prefer jump-diffusion, GARCH, or EVT when stress-testing emerging market portfolios?
+
+Code & interactive dashboard: https://github.com/quashanshayan123ansari/sensex-overall
+
+#QuantitativeFinance #FinancialModeling #RiskManagement #Python #DataScience #StockMarket #Sensex #Econometrics
