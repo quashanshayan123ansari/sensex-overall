@@ -63,8 +63,8 @@ def build_publication_figure(save_path: str = "sensex_gbm_fat_tails.png"):
         wspace=0.22,
         left=0.08,
         right=0.94,
-        top=0.91,
-        bottom=0.06
+        top=0.865,
+        bottom=0.055
     )
     
     # White Mode Color System
@@ -80,12 +80,12 @@ def build_publication_figure(save_path: str = "sensex_gbm_fat_tails.png"):
     
     # Header Titles
     fig.text(
-        0.08, 0.965,
+        0.08, 0.958,
         "BSE SENSEX: Dynamic Growth & Stochastic Diffusion",
         fontsize=20, weight='bold', color=c_text, ha='left'
     )
     fig.text(
-        0.08, 0.942,
+        0.08, 0.925,
         "July 1997 \u2192 October 2026: Realized Index Trajectory vs Calibrated GBM, Student-t MLE & GARCH(1,1)",
         fontsize=11, color=c_muted, ha='left'
     )

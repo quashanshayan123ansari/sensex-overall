@@ -61,17 +61,17 @@ def generate_monthly_growth_gif(
         item = timeline[m_idx]
         cur_month_str = item['month']
         
-        fig = plt.figure(figsize=(14, 9), facecolor=c_bg)
+        fig = plt.figure(figsize=(14, 9.2), facecolor=c_bg)
         gs = gridspec.GridSpec(
             nrows=3, ncols=2,
-            height_ratios=[1.4, 0.95, 0.45],
-            hspace=0.35, wspace=0.22,
-            left=0.08, right=0.94, top=0.92, bottom=0.06
+            height_ratios=[1.35, 0.95, 0.42],
+            hspace=0.38, wspace=0.22,
+            left=0.08, right=0.94, top=0.865, bottom=0.055
         )
         
         # Header
-        fig.text(0.08, 0.965, "BSE SENSEX Dynamic Trajectory Growth", fontsize=18, weight='bold', color=c_text)
-        fig.text(0.08, 0.940, f"Empirical Monthly Evolution: July 1997 \u2192 {cur_month_str} vs Calibrated GBM Diffusion", fontsize=10.5, color=c_muted)
+        fig.text(0.08, 0.955, "BSE SENSEX Dynamic Trajectory Growth", fontsize=18, weight='bold', color=c_text)
+        fig.text(0.08, 0.922, f"Empirical Monthly Evolution: July 1997 \u2192 {cur_month_str} vs Calibrated GBM Diffusion", fontsize=10.5, color=c_muted)
         
         # 1. Main Hero Panel: Monthly Price Growth (Log Scale)
         ax_main = fig.add_subplot(gs[0, :], facecolor=c_card)
