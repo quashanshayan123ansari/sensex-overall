@@ -3,33 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSE SENSEX vs Geometric Brownian Motion | Quantitative Fat-Tail Diagnostics</title>
-    <meta name="description" content="Empirical BSE SENSEX historical returns (1997–2026) vs Geometric Brownian Motion (GBM) with Student-t and GARCH(1,1) econometric extensions.">
+    <title>BSE SENSEX Dynamic Growth Simulator | Monthly Stochastic Trajectory (1997–2026)</title>
+    <meta name="description" content="Dynamic monthly evolution of the BSE SENSEX from July 1997 to October 2026 against expanding Geometric Brownian Motion (GBM) diffusion.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-base: #080c14;
-            --bg-surface: #0e1422;
-            --bg-card: #121929;
-            --border-subtle: #1e293b;
-            --border-highlight: #334155;
+            --bg-void: #05070c;
+            --bg-canvas: #090d16;
+            --bg-panel: #0e1424;
+            --bg-card: rgba(18, 26, 44, 0.7);
             
-            --color-actual: #ff7844;
-            --color-actual-glow: rgba(255, 120, 68, 0.25);
-            --color-gbm: #38bdf8;
-            --color-gbm-band: rgba(2, 132, 199, 0.28);
-            --color-student: #10b981;
-            --color-garch: #a855f7;
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            --border-glow: rgba(0, 245, 155, 0.25);
             
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            /* Signature Palette: Cyber Mint & Electric Violet */
+            --color-sensex: #00f59b;
+            --color-sensex-glow: rgba(0, 245, 155, 0.35);
+            --color-gbm-path: rgba(139, 92, 246, 0.15);
+            --color-gbm-band: rgba(124, 58, 237, 0.22);
+            --color-gbm-median: #a78bfa;
+            --color-crimson: #ff3366;
+            --color-gold: #fbbf24;
+            
+            --text-title: #ffffff;
+            --text-body: #cbd5e1;
             --text-muted: #64748b;
             
-            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-ui: 'Outfit', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
         }
 
         * {
@@ -39,206 +44,277 @@
         }
 
         body {
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            font-family: var(--font-main);
+            background-color: var(--bg-void);
+            color: var(--text-body);
+            font-family: var(--font-ui);
             min-height: 100vh;
-            padding: 24px 32px;
+            padding: 20px 28px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 18px;
+            overflow-x: hidden;
         }
 
-        /* Header */
+        /* Top Bar */
         header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px 20px;
+            background: linear-gradient(90deg, #0e1424 0%, #111a30 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        .header-title h1 {
-            font-size: 1.65rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(120deg, #ffffff 40%, var(--color-gbm) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-title p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .header-controls {
+        .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 14px;
         }
 
-        .btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-primary);
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn:hover {
-            border-color: var(--color-gbm);
-            background: #1e293b;
-        }
-
-        .btn.active {
-            background: rgba(56, 189, 248, 0.15);
-            border-color: var(--color-gbm);
-            color: var(--color-gbm);
-        }
-
-        /* Timeline bar */
-        .timeline-bar {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
+        .brand-icon {
+            width: 42px;
+            height: 42px;
             border-radius: 12px;
-            padding: 14px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .play-btn {
-            background: var(--color-gbm);
-            color: #080c14;
-            border: none;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-sensex) 0%, #059669 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: transform 0.15s, background 0.2s;
-            flex-shrink: 0;
+            box-shadow: 0 0 20px var(--color-sensex-glow);
+            color: #05070c;
+            font-weight: 800;
+            font-size: 1.25rem;
         }
 
-        .play-btn:hover {
-            transform: scale(1.06);
-            background: #7dd3fc;
-        }
-
-        .slider-wrapper {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            background: #1e293b;
-            border-radius: 3px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--color-actual);
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--color-actual-glow);
-            transition: transform 0.1s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        .current-date-badge {
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
+        .brand-text h1 {
+            font-size: 1.35rem;
             font-weight: 700;
-            color: var(--text-primary);
-            padding: 6px 14px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-highlight);
+            color: var(--text-title);
+            letter-spacing: -0.01em;
+        }
+
+        .brand-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Player Controls */
+        .playback-station {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(5, 7, 12, 0.7);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-title);
+            width: 36px;
+            height: 36px;
             border-radius: 8px;
-            min-width: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(0, 245, 155, 0.15);
+            border-color: var(--color-sensex);
+            color: var(--color-sensex);
+        }
+
+        .play-master-btn {
+            background: var(--color-sensex);
+            color: #05070c;
+            font-weight: 700;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 0 15px var(--color-sensex-glow);
+        }
+
+        .play-master-btn:hover {
+            transform: scale(1.05);
+            background: #22f8a8;
+        }
+
+        .speed-badge {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border: 1px solid transparent;
+        }
+
+        .speed-badge.active {
+            color: var(--color-sensex);
+            border-color: var(--color-sensex);
+            background: rgba(0, 245, 155, 0.1);
+        }
+
+        /* Month Ticker HUD */
+        .hud-ticker {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            background: #090d16;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .hud-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .hud-month {
+            font-family: var(--font-code);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-sensex);
+            text-shadow: 0 0 12px var(--color-sensex-glow);
+            min-width: 100px;
             text-align: center;
         }
 
-        /* Top Panel (Price Chart) */
-        .chart-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            border-radius: 14px;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
+        /* Live Metrics Cards */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
         }
 
-        .chart-header {
+        .m-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.25s, transform 0.2s;
+        }
+
+        .m-card:hover {
+            border-color: rgba(0, 245, 155, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .m-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--card-accent, var(--color-sensex));
+        }
+
+        .m-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .m-val {
+            font-family: var(--font-code);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .m-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Hero Chart Stage */
+        .stage-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 20px 24px;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .stage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .chart-title {
-            font-size: 1.05rem;
+        .stage-title {
+            font-size: 1.1rem;
             font-weight: 600;
+            color: var(--text-title);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .legend-inline {
+        .live-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-sensex);
+            box-shadow: 0 0 10px var(--color-sensex);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+
+        .legend-bar {
             display: flex;
-            gap: 16px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            gap: 18px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            align-items: center;
         }
 
-        .legend-item {
+        .legend-tag {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+        .tag-line {
+            width: 14px;
+            height: 3px;
+            border-radius: 2px;
         }
 
-        .canvas-container {
-            width: 100%;
+        .canvas-box {
             position: relative;
+            width: 100%;
         }
 
         canvas {
@@ -246,424 +322,428 @@
             width: 100%;
         }
 
-        /* Bottom Grid (2 charts) */
-        .bottom-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        /* Timeline Scrubber Bar */
+        .scrubber-zone {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        @media (max-width: 950px) {
-            .bottom-grid {
+        .range-slider {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #162035;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-sensex);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--color-sensex-glow);
+            transition: transform 0.15s;
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        /* Secondary Analytics Dock */
+        .analytics-dock {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .analytics-dock {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* KPI Grid */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 14px;
-            background: var(--bg-surface);
+        .mini-card {
+            background: var(--bg-panel);
             border: 1px solid var(--border-subtle);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 18px;
         }
 
-        .kpi-cell {
+        .mini-header {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 10px;
-            border-left: 2px solid var(--border-subtle);
-            transition: border-color 0.2s;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-title);
         }
-
-        .kpi-cell:hover {
-            border-left-color: var(--color-gbm);
-        }
-
-        .kpi-label {
-            font-size: 0.76rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-        }
-
-        .kpi-val {
-            font-size: 1.35rem;
-            font-weight: 700;
-            font-family: var(--font-mono);
-            color: var(--text-primary);
-        }
-
-        .kpi-sub {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        /* Colors */
-        .c-orange { color: var(--color-actual); }
-        .c-cyan { color: var(--color-gbm); }
-        .c-green { color: var(--color-student); }
-        .c-purple { color: var(--color-garch); }
-        .c-red { color: #f87171; }
 
         footer {
-            margin-top: 10px;
             text-align: center;
             font-size: 0.78rem;
             color: var(--text-muted);
+            padding: 10px 0;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header Navigation & Player -->
     <header>
-        <div class="header-title">
-            <h1>BSE SENSEX vs Geometric Brownian Motion</h1>
-            <p>Actual daily market data (1997–2026) vs calibrated GBM stochastic diffusion + Student-t & GARCH(1,1)</p>
+        <div class="brand">
+            <div class="brand-icon">S</div>
+            <div class="brand-text">
+                <h1>BSE SENSEX Dynamic Trajectory</h1>
+                <p>Real-time monthly growth vs stochastic Geometric Brownian Motion (1997–2026)</p>
+            </div>
         </div>
-        <div class="header-controls">
-            <button class="btn active" id="toggleBandBtn">5–95% GBM Band</button>
-            <button class="btn active" id="toggleMedianBtn">GBM Median</button>
-            <button class="btn active" id="toggleStudentBtn">Student-t Curve</button>
-            <button class="btn active" id="toggleGarchBtn">GARCH Residuals</button>
-            <button class="btn" id="toggleScaleBtn">Linear Scale</button>
+
+        <!-- Playback Station -->
+        <div class="playback-station">
+            <button class="ctrl-btn" id="btnPrev" title="Step Back 1 Month">◀</button>
+            <button class="ctrl-btn play-master-btn" id="btnPlay" title="Play / Pause Timeline">⏸</button>
+            <button class="ctrl-btn" id="btnNext" title="Step Forward 1 Month">▶</button>
+            <button class="ctrl-btn" id="btnReset" title="Reset to July 1997">⟲</button>
+            
+            <span style="width:1px; height:20px; background:var(--border-subtle); margin:0 4px;"></span>
+            
+            <span class="speed-badge active" data-speed="1">1x</span>
+            <span class="speed-badge" data-speed="2">2x</span>
+            <span class="speed-badge" data-speed="5">5x</span>
+        </div>
+
+        <!-- Date HUD -->
+        <div class="hud-ticker">
+            <span class="hud-label">Simulated Month</span>
+            <span class="hud-month" id="hudDate">Jul 1997</span>
         </div>
     </header>
 
-    <!-- Timeline Scrubber -->
-    <div class="timeline-bar">
-        <button class="play-btn" id="playBtn" title="Play / Pause Animation">▶</button>
-        <div class="slider-wrapper">
-            <div class="slider-labels">
-                <span>Jul 1997</span>
-                <span id="sliderMidDate">2011</span>
-                <span>Oct 2026</span>
-            </div>
-            <input type="range" id="timeSlider" min="50" max="1000" value="1000">
+    <!-- Real-time Expanding Metrics Strip -->
+    <div class="metrics-strip">
+        <div class="m-card" style="--card-accent: var(--color-sensex);">
+            <div class="m-label">SENSEX Index Level</div>
+            <div class="m-val" id="metricPrice" style="color:var(--color-sensex);">4,301</div>
+            <div class="m-sub" id="metricNormalized">Base 100.00 pts</div>
         </div>
-        <div class="current-date-badge" id="dateBadge">Oct 2026</div>
+
+        <div class="m-card" style="--card-accent: #38bdf8;">
+            <div class="m-label">Compounded Return (CAGR)</div>
+            <div class="m-val" id="metricCagr" style="color:#38bdf8;">0.00%</div>
+            <div class="m-sub">Geometric Drift Calibrated</div>
+        </div>
+
+        <div class="m-card" style="--card-accent: var(--color-gbm-median);">
+            <div class="m-label">Realized Volatility (σ)</div>
+            <div class="m-val" id="metricVol" style="color:var(--color-gbm-median);">20.00%</div>
+            <div class="m-sub">Annualized Rolling Std</div>
+        </div>
+
+        <div class="m-card" style="--card-accent: var(--color-crimson);">
+            <div class="m-label">4-Sigma Outlier Days</div>
+            <div class="m-val" id="metricOutliers" style="color:var(--color-crimson);">0 <span style="font-size:0.85rem;color:var(--text-muted);">days</span></div>
+            <div class="m-sub">Extreme Black Swan Moves</div>
+        </div>
+
+        <div class="m-card" style="--card-accent: var(--color-gold);">
+            <div class="m-label">Month-over-Month</div>
+            <div class="m-val" id="metricMom" style="color:var(--color-gold);">0.00%</div>
+            <div class="m-sub">Current Monthly Shift</div>
+        </div>
     </div>
 
-    <!-- Top Chart: Price Trajectory -->
-    <div class="chart-card">
-        <div class="chart-header">
-            <div class="chart-title">
-                <span>Price Trajectory & Confidence Cone</span>
-                <span style="font-size:0.8rem; color:var(--text-muted);">(Base 100 = Jul 1997)</span>
+    <!-- Main Hero Stage: Growing SENSEX Curve -->
+    <div class="stage-card">
+        <div class="stage-header">
+            <div class="stage-title">
+                <span class="live-pulse"></span>
+                <span>Monthly Trajectory Expansion (Log Scale)</span>
+                <span style="font-size:0.8rem; color:var(--text-muted); font-weight:400;">— Watching the curve grow from July 1997 to October 2026</span>
             </div>
-            <div class="legend-inline">
-                <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual SENSEX</div>
-                <div class="legend-item"><div class="dot" style="background:var(--color-gbm);"></div> GBM Median</div>
-                <div class="legend-item"><div class="dot" style="background:rgba(2, 132, 199, 0.6);"></div> 5–95% Band</div>
-            </div>
-        </div>
-        <div class="canvas-container">
-            <canvas id="priceCanvas" height="340"></canvas>
-        </div>
-    </div>
-
-    <!-- Bottom 2 Panels -->
-    <div class="bottom-grid">
-        <!-- Distribution Histogram -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <div class="chart-title">Return Distribution vs Fat Tails</div>
-                <div class="legend-inline">
-                    <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual</div>
-                    <div class="legend-item"><div class="dot" style="background:var(--color-gbm);"></div> Normal</div>
-                    <div class="legend-item"><div class="dot" style="background:var(--color-student);"></div> Student-t</div>
+            <div class="legend-bar">
+                <div class="legend-tag">
+                    <div class="tag-line" style="background:var(--color-sensex);"></div>
+                    <span>Realized SENSEX</span>
+                </div>
+                <div class="legend-tag">
+                    <div class="tag-line" style="background:var(--color-gbm-median); border-top:1px dashed #ffffff;"></div>
+                    <span>GBM Median Path</span>
+                </div>
+                <div class="legend-tag">
+                    <div class="tag-line" style="background:var(--color-gbm-band); height:6px;"></div>
+                    <span>5–95% Diffusion Cone</span>
                 </div>
             </div>
-            <div class="canvas-container">
-                <canvas id="distCanvas" height="260"></canvas>
-            </div>
         </div>
 
-        <!-- Q-Q Plot -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <div class="chart-title">Q-Q Plot vs Normal & GARCH</div>
-                <div class="legend-inline">
-                    <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual SENSEX</div>
-                    <div class="legend-item"><div class="dot" style="background:var(--color-garch);"></div> GARCH Standardized</div>
-                </div>
-            </div>
-            <div class="canvas-container">
-                <canvas id="qqCanvas" height="260"></canvas>
-            </div>
+        <div class="canvas-box">
+            <canvas id="growthCanvas" height="380"></canvas>
+        </div>
+
+        <!-- Scrubber -->
+        <div class="scrubber-zone">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code);">JUL 1997</span>
+            <input type="range" class="range-slider" id="scrubber" min="0" max="352" value="0">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code);">OCT 2026</span>
         </div>
     </div>
 
-    <!-- Summary KPI Panel -->
-    <div class="kpi-grid">
-        <div class="kpi-cell">
-            <div class="kpi-label">Trading Days</div>
-            <div class="kpi-val" id="kpiDays">7,216</div>
-            <div class="kpi-sub">Jul 1997 – Oct 2026</div>
+    <!-- Secondary Analytics Dock -->
+    <div class="analytics-dock">
+        <!-- Return Distribution -->
+        <div class="mini-card">
+            <div class="mini-header">
+                <span>Empirical Return Density vs Gaussian</span>
+                <span style="font-size:0.78rem; color:var(--color-sensex); font-family:var(--font-code);">Leptokurtosis</span>
+            </div>
+            <canvas id="distCanvas" height="220"></canvas>
         </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Annualized Return (CAGR)</div>
-            <div class="kpi-val c-green" id="kpiReturn">10.21%</div>
-            <div class="kpi-sub">GBM Drift Calibrated</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Annualized Volatility (σ)</div>
-            <div class="kpi-val c-cyan" id="kpiVol">22.38%</div>
-            <div class="kpi-sub">Daily σ = 1.41%</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Worst Single Day</div>
-            <div class="kpi-val c-red" id="kpiWorst">-14.10%</div>
-            <div class="kpi-sub">May 17, 2004</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Excess Kurtosis</div>
-            <div class="kpi-val c-orange" id="kpiKurt">8.76</div>
-            <div class="kpi-sub">Normal Gaussian = 0.00</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">GARCH Standardized Kurtosis</div>
-            <div class="kpi-val c-purple" id="kpiGarch">2.07</div>
-            <div class="kpi-sub">-57% drop (Vol Clustering)</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Student-t Shape Index</div>
-            <div class="kpi-val c-green" id="kpiDf">ν = 3.11</div>
-            <div class="kpi-sub">Confirms Heavy Power-Law Tail</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Days Beyond ±4σ (Black Swans)</div>
-            <div class="kpi-val c-red" id="kpiOutliers">45 <span style="font-size:0.8rem;color:var(--text-muted);">vs 0.46 exp</span></div>
-            <div class="kpi-sub">~100x Gaussian Rate</div>
+
+        <!-- Volatility & Kurtosis Evolution -->
+        <div class="mini-card">
+            <div class="mini-header">
+                <span>Expanding Excess Kurtosis Evolution</span>
+                <span style="font-size:0.78rem; color:var(--color-crimson); font-family:var(--font-code);">Fat-Tail Accumulator</span>
+            </div>
+            <canvas id="kurtCanvas" height="220"></canvas>
         </div>
     </div>
 
     <footer>
-        Data: S&P BSE SENSEX (^BSESN) daily closing prices (1997–2026). Calibrated GBM, Student-t MLE, and GARCH(1,1). Created for Quantitative Finance Research.
+        BSE SENSEX Quantitative Model Suite. Pure JavaScript & HTML5 Canvas monthly simulation engine.
     </footer>
 
-    <!-- Interactive Script -->
+    <!-- Interactive Simulation Script -->
     <script>
-        let rawData = null;
-        let isPlaying = false;
-        let playInterval = null;
-        let isLogScale = true;
-        let showBand = true;
-        let showMedian = true;
-        let showStudent = true;
-        let showGarch = true;
+        let db = null;
+        let curMonth = 0;
+        let isPlaying = true;
+        let playSpeed = 1; // 1x = ~200ms per month, 2x = 100ms, 5x = 40ms
+        let animTimer = null;
 
-        // Fetch pre-computed dashboard metrics
-        fetch('dashboard_data.json')
+        // Fetch monthly data
+        fetch('monthly_data.json')
             .then(res => res.json())
             .then(data => {
-                rawData = data;
-                initApp();
+                db = data;
+                initSimulator();
             })
-            .catch(err => {
-                console.error("Failed to load dashboard_data.json:", err);
+            .catch(err => console.error("Error loading monthly_data.json:", err));
+
+        function initSimulator() {
+            const scrubber = document.getElementById('scrubber');
+            scrubber.max = db.total_months - 1;
+            scrubber.value = 0;
+
+            // Event Listeners
+            document.getElementById('btnPlay').addEventListener('click', togglePlay);
+            document.getElementById('btnPrev').addEventListener('click', () => stepMonth(-1));
+            document.getElementById('btnNext').addEventListener('click', () => stepMonth(1));
+            document.getElementById('btnReset').addEventListener('click', resetToStart);
+
+            scrubber.addEventListener('input', (e) => {
+                curMonth = parseInt(e.target.value);
+                updateFrame();
             });
 
-        function initApp() {
-            const slider = document.getElementById('timeSlider');
-            slider.max = rawData.prices.length - 1;
-            slider.value = rawData.prices.length - 1;
-
-            slider.addEventListener('input', () => {
-                renderAll();
+            // Speed Badges
+            document.querySelectorAll('.speed-badge').forEach(badge => {
+                badge.addEventListener('click', function() {
+                    document.querySelectorAll('.speed-badge').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    playSpeed = parseInt(this.getAttribute('data-speed'));
+                    if (isPlaying) {
+                        restartTimer();
+                    }
+                });
             });
 
-            // Toggle buttons
-            document.getElementById('playBtn').addEventListener('click', togglePlay);
-            
-            document.getElementById('toggleBandBtn').addEventListener('click', function() {
-                showBand = !showBand;
-                this.classList.toggle('active', showBand);
-                drawPriceChart();
+            window.addEventListener('resize', () => {
+                drawGrowthCanvas();
+                drawDistCanvas();
+                drawKurtCanvas();
             });
 
-            document.getElementById('toggleMedianBtn').addEventListener('click', function() {
-                showMedian = !showMedian;
-                this.classList.toggle('active', showMedian);
-                drawPriceChart();
-            });
+            updateFrame();
+            startPlayback();
+        }
 
-            document.getElementById('toggleStudentBtn').addEventListener('click', function() {
-                showStudent = !showStudent;
-                this.classList.toggle('active', showStudent);
-                drawDistChart();
-            });
+        function startPlayback() {
+            isPlaying = true;
+            document.getElementById('btnPlay').textContent = '⏸';
+            restartTimer();
+        }
 
-            document.getElementById('toggleGarchBtn').addEventListener('click', function() {
-                showGarch = !showGarch;
-                this.classList.toggle('active', showGarch);
-                drawQQChart();
-            });
+        function restartTimer() {
+            if (animTimer) clearInterval(animTimer);
+            const intervalMs = Math.max(30, Math.floor(180 / playSpeed));
+            animTimer = setInterval(() => {
+                if (curMonth < db.total_months - 1) {
+                    curMonth++;
+                    document.getElementById('scrubber').value = curMonth;
+                    updateFrame();
+                } else {
+                    // Loop or pause
+                    pausePlayback();
+                }
+            }, intervalMs);
+        }
 
-            document.getElementById('toggleScaleBtn').addEventListener('click', function() {
-                isLogScale = !isLogScale;
-                this.textContent = isLogScale ? "Linear Scale" : "Logarithmic Scale";
-                this.classList.toggle('active', !isLogScale);
-                drawPriceChart();
-            });
-
-            window.addEventListener('resize', renderAll);
-            renderAll();
+        function pausePlayback() {
+            isPlaying = false;
+            document.getElementById('btnPlay').textContent = '▶';
+            if (animTimer) clearInterval(animTimer);
         }
 
         function togglePlay() {
-            const playBtn = document.getElementById('playBtn');
-            const slider = document.getElementById('timeSlider');
             if (isPlaying) {
-                clearInterval(playInterval);
-                isPlaying = false;
-                playBtn.textContent = '▶';
+                pausePlayback();
             } else {
-                if (parseInt(slider.value) >= parseInt(slider.max)) {
-                    slider.value = 50;
+                if (curMonth >= db.total_months - 1) {
+                    curMonth = 0;
                 }
-                isPlaying = true;
-                playBtn.textContent = '⏸';
-                playInterval = setInterval(() => {
-                    let val = parseInt(slider.value) + 8;
-                    if (val >= parseInt(slider.max)) {
-                        slider.value = slider.max;
-                        togglePlay();
-                    } else {
-                        slider.value = val;
-                    }
-                    renderAll();
-                }, 40);
+                startPlayback();
             }
         }
 
-        function renderAll() {
-            if (!rawData) return;
-            const slider = document.getElementById('timeSlider');
-            const curIdx = parseInt(slider.value);
-            const curDate = rawData.dates[curIdx];
-            document.getElementById('dateBadge').textContent = formatDate(curDate);
+        function stepMonth(delta) {
+            pausePlayback();
+            curMonth = Math.max(0, Math.min(db.total_months - 1, curMonth + delta));
+            document.getElementById('scrubber').value = curMonth;
+            updateFrame();
+        }
+
+        function resetToStart() {
+            pausePlayback();
+            curMonth = 0;
+            document.getElementById('scrubber').value = 0;
+            updateFrame();
+        }
+
+        function updateFrame() {
+            if (!db) return;
+            const item = db.timeline[curMonth];
             
-            drawPriceChart();
-            drawDistChart();
-            drawQQChart();
+            // Update HUD
+            document.getElementById('hudDate').textContent = item.month;
+            document.getElementById('metricPrice').textContent = Math.round(item.raw_price).toLocaleString();
+            document.getElementById('metricNormalized').textContent = `Base ${item.price.toFixed(2)} pts`;
+            document.getElementById('metricCagr').textContent = `${item.cagr.toFixed(2)}%`;
+            document.getElementById('metricVol').textContent = `${item.vol.toFixed(2)}%`;
+            document.getElementById('metricOutliers').innerHTML = `${item.outliers} <span style="font-size:0.85rem;color:var(--text-muted);">days</span>`;
+            
+            const momEl = document.getElementById('metricMom');
+            momEl.textContent = `${item.mom >= 0 ? '+' : ''}${item.mom.toFixed(2)}%`;
+            momEl.style.color = item.mom >= 0 ? 'var(--color-sensex)' : 'var(--color-crimson)';
+
+            drawGrowthCanvas();
+            drawDistCanvas();
+            drawKurtCanvas();
         }
 
-        function formatDate(dStr) {
-            const d = new Date(dStr);
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            return `${months[d.getMonth()]} ${d.getFullYear()}`;
-        }
-
-        // ==========================================
-        // 1. Price Canvas Chart
-        // ==========================================
-        function drawPriceChart() {
-            const canvas = document.getElementById('priceCanvas');
+        // ========================================================
+        // Main Growth Canvas: SENSEX growing month-by-month
+        // ========================================================
+        function drawGrowthCanvas() {
+            const canvas = document.getElementById('growthCanvas');
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * window.devicePixelRatio;
             canvas.height = rect.height * window.devicePixelRatio;
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-            const width = rect.width;
-            const height = rect.height;
-            const padding = { top: 20, right: 30, bottom: 35, left: 60 };
+            const W = rect.width;
+            const H = rect.height;
+            const pad = { top: 25, right: 35, bottom: 35, left: 55 };
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, W, H);
 
-            const slider = document.getElementById('timeSlider');
-            const curIdx = parseInt(slider.value);
-            const totalPoints = rawData.prices.length;
+            const total = db.total_months;
+            const minLog = Math.log10(50);
+            const maxLog = Math.log10(200000);
 
-            const minVal = 40;
-            const maxVal = 250000;
-
-            function getY(val) {
-                if (isLogScale) {
-                    const logMin = Math.log10(minVal);
-                    const logMax = Math.log10(maxVal);
-                    const logVal = Math.log10(Math.max(val, minVal));
-                    return height - padding.bottom - ((logVal - logMin) / (logMax - logMin)) * (height - padding.top - padding.bottom);
-                } else {
-                    return height - padding.bottom - (val / 80000) * (height - padding.top - padding.bottom);
-                }
+            function getX(idx) {
+                return pad.left + (idx / (total - 1)) * (W - pad.left - pad.right);
             }
 
-            function getX(i) {
-                return padding.left + (i / (totalPoints - 1)) * (width - padding.left - padding.right);
+            function getY(val) {
+                const logV = Math.log10(Math.max(val, 50));
+                return H - pad.bottom - ((logV - minLog) / (maxLog - minLog)) * (H - pad.top - pad.bottom);
             }
 
             // Grid lines
-            ctx.strokeStyle = '#1e293b';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.lineWidth = 0.8;
             ctx.fillStyle = '#64748b';
             ctx.font = '10px JetBrains Mono';
 
-            const yTicks = isLogScale ? [100, 1000, 10000, 100000] : [10000, 30000, 50000, 70000];
-            yTicks.forEach(tick => {
+            [100, 1000, 10000, 100000].forEach(tick => {
                 const y = getY(tick);
                 ctx.beginPath();
-                ctx.moveTo(padding.left, y);
-                ctx.lineTo(width - padding.right, y);
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(W - pad.right, y);
                 ctx.stroke();
                 ctx.fillText(tick.toLocaleString(), 10, y + 3);
             });
 
-            // Date X ticks
-            for (let step = 0; step < totalPoints; step += Math.floor(totalPoints / 5)) {
-                const x = getX(step);
+            // Date Ticks across bottom
+            for (let i = 0; i < total; i += 60) {
+                const x = getX(i);
                 ctx.beginPath();
-                ctx.moveTo(x, height - padding.bottom);
-                ctx.lineTo(x, height - padding.bottom + 5);
+                ctx.moveTo(x, H - pad.bottom);
+                ctx.lineTo(x, H - pad.bottom + 5);
                 ctx.stroke();
-                ctx.fillText(rawData.dates[step].slice(0, 4), x - 12, height - padding.bottom + 18);
+                ctx.fillText(db.timeline[i].month.slice(-4), x - 12, H - pad.bottom + 18);
             }
 
-            // Theoretical GBM Median & Confidence Band
-            const mu = rawData.summary.ann_geo_return / 100;
-            const sigma = rawData.summary.ann_vol / 100;
-            const dt = 1 / 252;
-            const s0 = 100;
-
-            if (showBand) {
+            // 1. GBM Background Diffusion Paths up to curMonth
+            ctx.lineWidth = 0.8;
+            for (let p = 0; p < db.gbm.paths.length; p++) {
+                ctx.strokeStyle = 'rgba(139, 92, 246, 0.07)';
                 ctx.beginPath();
-                // Upper 95%
-                for (let i = 0; i <= curIdx; i++) {
-                    const t = (i * 4) * dt;
-                    const p95 = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t + 1.645 * sigma * Math.sqrt(t));
+                for (let i = 0; i <= curMonth; i++) {
                     const x = getX(i);
-                    const y = getY(p95);
+                    const y = getY(db.gbm.paths[p][i]);
                     if (i === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
-                // Lower 5%
-                for (let i = curIdx; i >= 0; i--) {
-                    const t = (i * 4) * dt;
-                    const p5 = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t - 1.645 * sigma * Math.sqrt(t));
+                ctx.stroke();
+            }
+
+            // 2. GBM 5–95% Expanding Confidence Ribbon
+            if (curMonth > 1) {
+                ctx.beginPath();
+                for (let i = 0; i <= curMonth; i++) {
                     const x = getX(i);
-                    const y = getY(p5);
+                    const y = getY(db.gbm.p95[i]);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                for (let i = curMonth; i >= 0; i--) {
+                    const x = getX(i);
+                    const y = getY(db.gbm.p5[i]);
                     ctx.lineTo(x, y);
                 }
                 ctx.closePath();
-                ctx.fillStyle = 'rgba(2, 132, 199, 0.25)';
+                ctx.fillStyle = 'rgba(124, 58, 237, 0.22)';
                 ctx.fill();
-            }
 
-            // GBM Median Line
-            if (showMedian) {
+                // GBM Median Line
                 ctx.beginPath();
-                ctx.strokeStyle = '#38bdf8';
+                ctx.strokeStyle = '#a78bfa';
                 ctx.lineWidth = 1.6;
-                ctx.setLineDash([5, 4]);
-                for (let i = 0; i <= curIdx; i++) {
-                    const t = (i * 4) * dt;
-                    const pMed = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t);
+                ctx.setLineDash([4, 4]);
+                for (let i = 0; i <= curMonth; i++) {
                     const x = getX(i);
-                    const y = getY(pMed);
+                    const y = getY(db.gbm.p50[i]);
                     if (i === 0) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
@@ -671,31 +751,42 @@
                 ctx.setLineDash([]);
             }
 
-            // Actual SENSEX Line
+            // 3. Realized SENSEX Trajectory Growing Month by Month!
             ctx.beginPath();
-            ctx.strokeStyle = '#ff7844';
-            ctx.lineWidth = 2.2;
-            for (let i = 0; i <= curIdx; i++) {
+            ctx.strokeStyle = '#00f59b';
+            ctx.lineWidth = 2.6;
+            ctx.shadowColor = 'rgba(0, 245, 155, 0.45)';
+            ctx.shadowBlur = 10;
+
+            for (let i = 0; i <= curMonth; i++) {
                 const x = getX(i);
-                const y = getY(rawData.prices[i]);
+                const y = getY(db.timeline[i].price);
                 if (i === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
+            ctx.shadowBlur = 0; // reset shadow
 
-            // Terminal Point
-            const lastX = getX(curIdx);
-            const lastY = getY(rawData.prices[curIdx]);
+            // 4. Moving Head Pulse Dot
+            const headX = getX(curMonth);
+            const headY = getY(db.timeline[curMonth].price);
+
             ctx.beginPath();
-            ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
-            ctx.fillStyle = '#ff7844';
+            ctx.arc(headX, headY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(headX, headY, 12, 0, Math.PI * 2);
+            ctx.strokeStyle = '#00f59b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
 
-        // ==========================================
-        // 2. Return Distribution Chart
-        // ==========================================
-        function drawDistChart() {
+        // ========================================================
+        // Secondary Chart 1: Return Density
+        // ========================================================
+        function drawDistCanvas() {
             const canvas = document.getElementById('distCanvas');
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
@@ -703,181 +794,122 @@
             canvas.height = rect.height * window.devicePixelRatio;
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-            const width = rect.width;
-            const height = rect.height;
-            const padding = { top: 20, right: 25, bottom: 35, left: 45 };
+            const W = rect.width;
+            const H = rect.height;
+            const pad = { top: 15, right: 20, bottom: 25, left: 35 };
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, W, H);
 
-            const bins = rawData.distribution.bins;
-            const density = rawData.distribution.density;
+            const bins = db.distribution.bins;
+            const dens = db.distribution.density;
 
             const xMin = -6.0;
             const xMax = 6.0;
-            const yMax = 0.46;
+            const yMax = 0.45;
 
-            function getX(val) {
-                return padding.left + ((val - xMin) / (xMax - xMin)) * (width - padding.left - padding.right);
+            function getX(v) {
+                return pad.left + ((v - xMin) / (xMax - xMin)) * (W - pad.left - pad.right);
+            }
+            function getY(v) {
+                return H - pad.bottom - (v / yMax) * (H - pad.top - pad.bottom);
             }
 
-            function getY(val) {
-                return height - padding.bottom - (val / yMax) * (height - padding.top - padding.bottom);
-            }
-
-            // Grid lines
-            ctx.strokeStyle = '#1e293b';
+            // Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.lineWidth = 0.8;
-            ctx.fillStyle = '#64748b';
-            ctx.font = '9px JetBrains Mono';
-
-            [-4, -2, 0, 2, 4].forEach(xVal => {
-                const x = getX(xVal);
+            [-4, -2, 0, 2, 4].forEach(tick => {
+                const x = getX(tick);
                 ctx.beginPath();
-                ctx.moveTo(x, padding.top);
-                ctx.lineTo(x, height - padding.bottom);
+                ctx.moveTo(x, pad.top);
+                ctx.lineTo(x, H - pad.bottom);
                 ctx.stroke();
-                ctx.fillText(xVal + '%', x - 8, height - padding.bottom + 16);
+                ctx.fillStyle = '#64748b';
+                ctx.font = '9px JetBrains Mono';
+                ctx.fillText(tick + '%', x - 8, H - pad.bottom + 14);
             });
 
-            // Draw histogram bars
-            const barW = (width - padding.left - padding.right) / bins.length;
-            ctx.fillStyle = 'rgba(255, 120, 68, 0.82)';
+            // Bars
+            const barW = (W - pad.left - pad.right) / bins.length;
+            ctx.fillStyle = 'rgba(0, 245, 155, 0.6)';
             for (let i = 0; i < bins.length; i++) {
                 const x = getX(bins[i]) - barW / 2;
-                const y = getY(density[i]);
-                const h = height - padding.bottom - y;
-                ctx.fillRect(x, y, barW - 0.5, h);
+                const y = getY(dens[i]);
+                ctx.fillRect(x, y, barW - 0.5, H - pad.bottom - y);
             }
 
-            // Normal Gaussian curve
-            const mean = rawData.distribution.norm_mean;
-            const std = rawData.distribution.norm_std;
+            // Normal Curve
             ctx.beginPath();
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2.0;
-            for (let xV = xMin; xV <= xMax; xV += 0.1) {
-                const z = (xV - mean) / std;
-                const pdf = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
-                const x = getX(xV);
-                const y = getY(pdf);
-                if (xV === xMin) ctx.moveTo(x, y);
+            ctx.strokeStyle = '#a78bfa';
+            ctx.lineWidth = 1.8;
+            for (let v = xMin; v <= xMax; v += 0.1) {
+                const z = (v - db.distribution.mean) / db.distribution.std;
+                const p = (1 / (db.distribution.std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+                const x = getX(v);
+                const y = getY(p);
+                if (v === xMin) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
-
-            // Student-t curve
-            if (showStudent) {
-                const df = rawData.distribution.t_df;
-                const loc = rawData.distribution.t_loc;
-                const scale = rawData.distribution.t_scale;
-                
-                // Gamma helper for Student-t
-                function gamma(n) {
-                    if (n === 1) return 1;
-                    if (n === 0.5) return Math.sqrt(Math.PI);
-                    return (n - 1) * gamma(n - 1);
-                }
-
-                ctx.beginPath();
-                ctx.strokeStyle = '#10b981';
-                ctx.lineWidth = 2.0;
-                for (let xV = xMin; xV <= xMax; xV += 0.1) {
-                    const z = (xV - loc) / scale;
-                    // Approximation of Student-t PDF
-                    const coef = 0.36; // Normalized scale factor for nu ~ 3.1
-                    const pdf = (coef / scale) * Math.pow(1 + (z * z) / df, -(df + 1) / 2);
-                    const x = getX(xV);
-                    const y = getY(pdf);
-                    if (xV === xMin) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
         }
 
-        // ==========================================
-        // 3. Q-Q Plot Canvas
-        // ==========================================
-        function drawQQChart() {
-            const canvas = document.getElementById('qqCanvas');
+        // ========================================================
+        // Secondary Chart 2: Expanding Kurtosis Evolution
+        // ========================================================
+        function drawKurtCanvas() {
+            const canvas = document.getElementById('kurtCanvas');
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * window.devicePixelRatio;
             canvas.height = rect.height * window.devicePixelRatio;
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-            const width = rect.width;
-            const height = rect.height;
-            const padding = { top: 20, right: 25, bottom: 35, left: 45 };
+            const W = rect.width;
+            const H = rect.height;
+            const pad = { top: 15, right: 20, bottom: 25, left: 35 };
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, W, H);
 
-            const xMin = -4.2;
-            const xMax = 4.2;
-            const yMin = -15.0;
-            const yMax = 9.0;
+            const total = db.total_months;
+            const maxKurt = 16.0;
 
-            function getX(val) {
-                return padding.left + ((val - xMin) / (xMax - xMin)) * (width - padding.left - padding.right);
+            function getX(idx) {
+                return pad.left + (idx / (total - 1)) * (W - pad.left - pad.right);
+            }
+            function getY(k) {
+                return H - pad.bottom - (Math.max(0, k) / maxKurt) * (H - pad.top - pad.bottom);
             }
 
-            function getY(val) {
-                return height - padding.bottom - ((val - yMin) / (yMax - yMin)) * (height - padding.top - padding.bottom);
-            }
-
-            // Grid
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineWidth = 0.8;
-            ctx.fillStyle = '#64748b';
-            ctx.font = '9px JetBrains Mono';
-
-            [-3, -1, 1, 3].forEach(xV => {
-                const x = getX(xV);
-                ctx.beginPath();
-                ctx.moveTo(x, padding.top);
-                ctx.lineTo(x, height - padding.bottom);
-                ctx.stroke();
-                ctx.fillText(xV + 'σ', x - 6, height - padding.bottom + 16);
-            });
-
-            [-10, -5, 0, 5].forEach(yV => {
-                const y = getY(yV);
-                ctx.beginPath();
-                ctx.moveTo(padding.left, y);
-                ctx.lineTo(width - padding.right, y);
-                ctx.stroke();
-                ctx.fillText(yV + 'σ', 12, y + 3);
-            });
-
-            // 45 deg Normal line
+            // Normal baseline (Kurt = 0)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.setLineDash([3, 3]);
             ctx.beginPath();
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 1.5;
-            ctx.setLineDash([4, 4]);
-            ctx.moveTo(getX(-4), getY(-4));
-            ctx.lineTo(getX(4), getY(4));
+            ctx.moveTo(pad.left, getY(0));
+            ctx.lineTo(W - pad.right, getY(0));
             ctx.stroke();
             ctx.setLineDash([]);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '9px JetBrains Mono';
+            ctx.fillText('Normal = 0', pad.left + 6, getY(0) - 5);
 
-            // GARCH Standardized Points
-            if (showGarch && rawData.qq.garch) {
-                ctx.fillStyle = '#a855f7';
-                for (let i = 0; i < rawData.qq.theoretical.length; i++) {
-                    const x = getX(rawData.qq.theoretical[i]);
-                    const y = getY(rawData.qq.garch[i]);
-                    ctx.beginPath();
-                    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            // Actual SENSEX Points
-            ctx.fillStyle = '#ff7844';
-            for (let i = 0; i < rawData.qq.theoretical.length; i++) {
-                const x = getX(rawData.qq.theoretical[i]);
-                const y = getY(rawData.qq.actual[i]);
+            // Expanding kurtosis path
+            if (curMonth > 10) {
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.strokeStyle = '#ff3366';
+                ctx.lineWidth = 2.0;
+                for (let i = 10; i <= curMonth; i++) {
+                    const x = getX(i);
+                    const y = getY(db.timeline[i].kurt);
+                    if (i === 10) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // Current head point
+                const hX = getX(curMonth);
+                const hY = getY(db.timeline[curMonth].kurt);
+                ctx.beginPath();
+                ctx.arc(hX, hY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ff3366';
                 ctx.fill();
             }
         }
