@@ -100,7 +100,7 @@ with st.sidebar:
     scale_log = st.checkbox("Logarithmic Scale for Price Trajectory", value=True)
     
     st.markdown("---")
-    st.caption("Inspired by Bruce Tan's S&P 500 research with Indian Market extensions.")
+    st.caption("Empirical Quantitative Research on Indian Equity Markets & Stochastic Modeling.")
 
 # Data fetching
 @st.cache_data(ttl=3600)
