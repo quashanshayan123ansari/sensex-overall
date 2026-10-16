@@ -1,7 +1,7 @@
 """
-Streamlit Quantitative Finance Application:
+Streamlit Quantitative Finance Application (Clean White Theme)
 BSE SENSEX Dynamic Trajectory vs Geometric Brownian Motion (GBM)
-Palette: Cyber Mint (#00f59b) & Electric Violet (#8b5cf6)
+Palette: Pure White, Emerald Jade (#059669), and Royal Violet (#7c3aed)
 """
 
 import streamlit as st
@@ -11,53 +11,55 @@ import scipy.stats as stats
 import plotly.graph_objects as go
 import quant_models as qm
 
-# Configure page layout and dark styling
+# Configure page layout and light styling
 st.set_page_config(
     page_title="BSE SENSEX Dynamic Trajectory | Quantitative Model",
-    page_icon="⚡",
+    page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for Cyber Mint & Electric Violet aesthetic
+# Custom CSS for Clean White aesthetic
 st.markdown("""
 <style>
     .reportview-container, .main, header, footer {
-        background-color: #060910;
-        color: #f1f5f9;
+        background-color: #f8fafc;
+        color: #0f172a;
         font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     .metric-card {
-        background: linear-gradient(135deg, rgba(14, 20, 36, 0.95), rgba(10, 15, 29, 0.8));
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 14px;
         padding: 16px 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
         margin-bottom: 12px;
-        border-left: 3px solid #00f59b;
+        border-left: 4px solid #059669;
     }
     .metric-title {
         font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: #64748b;
+        font-weight: 600;
         margin-bottom: 4px;
     }
     .metric-value {
         font-size: 1.65rem;
         font-weight: 700;
-        color: #ffffff;
+        color: #0f172a;
         line-height: 1.2;
         font-family: 'JetBrains Mono', monospace;
     }
     .metric-sub {
         font-size: 0.78rem;
         margin-top: 4px;
+        color: #64748b;
     }
-    .text-mint { color: #00f59b !important; }
-    .text-violet { color: #a78bfa !important; }
-    .text-cyan { color: #38bdf8 !important; }
-    .text-crimson { color: #ff3366 !important; }
+    .text-emerald { color: #059669 !important; }
+    .text-violet { color: #7c3aed !important; }
+    .text-blue { color: #2563eb !important; }
+    .text-crimson { color: #e11d48 !important; }
     
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
@@ -65,20 +67,22 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         border-radius: 8px 8px 0px 0px;
         padding: 10px 18px;
-        background-color: #0e1424;
-        color: #94a3b8;
+        background-color: #ffffff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #172033 !important;
-        color: #00f59b !important;
-        border-bottom: 2px solid #00f59b !important;
+        background-color: #f1f5f9 !important;
+        color: #059669 !important;
+        border-bottom: 2px solid #059669 !important;
+        font-weight: 700;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Sidebar settings
 with st.sidebar:
-    st.title("⚡ Trajectory Engine")
+    st.title("📈 Trajectory Engine")
     st.caption("Stochastic Diffusion vs Empirical SENSEX Dynamics")
     
     ticker_choice = st.selectbox(
@@ -122,7 +126,7 @@ summary = qm.calculate_summary_stats(returns, price)
 cond_vol, std_resid, garch_kurt = qm.fit_garch_model(returns)
 
 # Header
-st.title("⚡ BSE SENSEX: Dynamic Growth & Stochastic Diffusion")
+st.title("📈 BSE SENSEX: Dynamic Growth & Stochastic Diffusion")
 st.markdown(
     f"Evaluating **{summary['n_days']:,}** daily observations "
     f"({dates[0].strftime('%b %Y')} – {dates[-1].strftime('%b %Y')}) "
@@ -134,34 +138,34 @@ kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
 with kpi1:
     st.markdown(f"""
-    <div class="metric-card" style="border-left-color: #00f59b;">
+    <div class="metric-card" style="border-left-color: #059669;">
         <div class="metric-title">Compounded Growth (CAGR)</div>
-        <div class="metric-value text-mint">{summary['ann_geo_return']*100:.2f}%</div>
+        <div class="metric-value text-emerald">{summary['ann_geo_return']*100:.2f}%</div>
         <div class="metric-sub text-violet">Base 100 to {price.iloc[-1]:,.0f} pts</div>
     </div>
     """, unsafe_allow_html=True)
 
 with kpi2:
     st.markdown(f"""
-    <div class="metric-card" style="border-left-color: #a78bfa;">
+    <div class="metric-card" style="border-left-color: #7c3aed;">
         <div class="metric-title">Annualized Volatility (σ)</div>
         <div class="metric-value text-violet">{summary['ann_vol']*100:.2f}%</div>
-        <div class="metric-sub text-cyan">Daily σ: {summary['daily_std']*100:.2f}%</div>
+        <div class="metric-sub text-blue">Daily σ: {summary['daily_std']*100:.2f}%</div>
     </div>
     """, unsafe_allow_html=True)
 
 with kpi3:
     st.markdown(f"""
-    <div class="metric-card" style="border-left-color: #38bdf8;">
+    <div class="metric-card" style="border-left-color: #2563eb;">
         <div class="metric-title">Excess Kurtosis (Leptokurtic)</div>
-        <div class="metric-value text-cyan">{summary['excess_kurtosis']:.2f}</div>
-        <div class="metric-sub text-mint">GARCH Standardized: {garch_kurt:.2f} (-57%)</div>
+        <div class="metric-value text-blue">{summary['excess_kurtosis']:.2f}</div>
+        <div class="metric-sub text-emerald">GARCH Standardized: {garch_kurt:.2f} (-57%)</div>
     </div>
     """, unsafe_allow_html=True)
 
 with kpi4:
     st.markdown(f"""
-    <div class="metric-card" style="border-left-color: #ff3366;">
+    <div class="metric-card" style="border-left-color: #e11d48;">
         <div class="metric-title">4-Sigma Black Swan Days</div>
         <div class="metric-value text-crimson">{summary['outliers_4s']} <span style="font-size:1rem;color:#64748b;">days</span></div>
         <div class="metric-sub text-violet">Gaussian Expects: {summary['expected_4s']:.2f} days</div>
@@ -200,7 +204,7 @@ with tab_traj:
         fig_traj.add_trace(go.Scatter(
             x=dates, y=paths[i],
             mode='lines',
-            line=dict(color='rgba(139, 92, 246, 0.06)', width=1),
+            line=dict(color='rgba(124, 58, 237, 0.08)', width=1),
             showlegend=False,
             hoverinfo='skip'
         ))
@@ -217,43 +221,43 @@ with tab_traj:
         mode='lines',
         line=dict(width=0),
         fill='tonexty',
-        fillcolor='rgba(109, 40, 217, 0.22)',
+        fillcolor='rgba(124, 58, 237, 0.14)',
         name=f'GBM {lower_pct:.0f}–{upper_pct:.0f}% Diffusion Cone'
     ))
     
     fig_traj.add_trace(go.Scatter(
         x=dates, y=p_med,
         mode='lines',
-        line=dict(color='#a78bfa', width=2, dash='dash'),
+        line=dict(color='#7c3aed', width=2, dash='dash'),
         name='GBM Median Drift Path'
     ))
     
     fig_traj.add_trace(go.Scatter(
         x=dates, y=price,
         mode='lines',
-        line=dict(color='#00f59b', width=2.6),
+        line=dict(color='#059669', width=2.6),
         name=f'Realized {ticker_choice} (Base 100)'
     ))
     
     fig_traj.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#0a0f1d",
-        plot_bgcolor="#0a0f1d",
+        template="plotly_white",
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
         height=540,
         margin=dict(l=50, r=30, t=30, b=40),
         yaxis=dict(
             type="log" if scale_log else "linear",
-            gridcolor="#172033",
+            gridcolor="#f1f5f9",
             title="Index Level (Base 100)"
         ),
-        xaxis=dict(gridcolor="#172033", title="Timeline"),
+        xaxis=dict(gridcolor="#f1f5f9", title="Timeline"),
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor="rgba(10, 15, 29, 0.9)"
+            bgcolor="rgba(255, 255, 255, 0.95)"
         )
     )
     st.plotly_chart(fig_traj, use_container_width=True)
@@ -271,30 +275,30 @@ with tab_dist:
         x=ret_pct,
         histnorm='probability density',
         nbinsx=90,
-        marker_color='rgba(0, 245, 155, 0.75)',
+        marker_color='rgba(5, 150, 105, 0.70)',
         name='Realized Daily Returns'
     ))
     fig_dist.add_trace(go.Scatter(
         x=x_dense, y=pdf_norm,
         mode='lines',
-        line=dict(color='#a78bfa', width=2.2),
+        line=dict(color='#7c3aed', width=2.2),
         name='Gaussian Normal (GBM)'
     ))
     if show_student_t:
         fig_dist.add_trace(go.Scatter(
             x=x_dense, y=pdf_t,
             mode='lines',
-            line=dict(color='#38bdf8', width=2.2),
+            line=dict(color='#0284c7', width=2.2),
             name=f'Student-t Fit (ν = {t_df:.2f})'
         ))
         
     fig_dist.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#0a0f1d",
-        plot_bgcolor="#0a0f1d",
+        template="plotly_white",
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
         height=480,
-        xaxis=dict(range=[-6.2, 6.2], gridcolor="#172033", title="Daily Log Return (%)"),
-        yaxis=dict(gridcolor="#172033", title="Probability Density"),
+        xaxis=dict(range=[-6.2, 6.2], gridcolor="#f1f5f9", title="Daily Log Return (%)"),
+        yaxis=dict(gridcolor="#f1f5f9", title="Probability Density"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     st.plotly_chart(fig_dist, use_container_width=True)
@@ -309,13 +313,13 @@ with tab_qq:
     fig_qq.add_trace(go.Scatter(
         x=q_x, y=q_x,
         mode='lines',
-        line=dict(color='#64748b', width=1.5, dash='dash'),
+        line=dict(color='#94a3b8', width=1.5, dash='dash'),
         name='Normal Reference (45°)'
     ))
     fig_qq.add_trace(go.Scatter(
         x=osm_a[::2], y=osr_a[::2],
         mode='markers',
-        marker=dict(color='#00f59b', size=5, opacity=0.8),
+        marker=dict(color='#059669', size=5, opacity=0.8),
         name='Realized SENSEX'
     ))
     if show_garch:
@@ -324,17 +328,17 @@ with tab_qq:
         fig_qq.add_trace(go.Scatter(
             x=osm_g[::2], y=osr_g[::2],
             mode='markers',
-            marker=dict(color='#f43f5e', size=5, opacity=0.6),
+            marker=dict(color='#e11d48', size=5, opacity=0.6),
             name=f'GARCH Standardized (Kurt: {garch_kurt:.2f})'
         ))
         
     fig_qq.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#0a0f1d",
-        plot_bgcolor="#0a0f1d",
+        template="plotly_white",
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
         height=500,
-        xaxis=dict(range=[-4.2, 4.2], gridcolor="#172033", title="Theoretical Normal Quantiles (σ)"),
-        yaxis=dict(range=[-15.0, 9.0], gridcolor="#172033", title="Sample Quantiles (σ)"),
+        xaxis=dict(range=[-4.2, 4.2], gridcolor="#f1f5f9", title="Theoretical Normal Quantiles (σ)"),
+        yaxis=dict(range=[-15.0, 9.0], gridcolor="#f1f5f9", title="Sample Quantiles (σ)"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     st.plotly_chart(fig_qq, use_container_width=True)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSE SENSEX Dynamic Growth Simulator | Monthly Stochastic Trajectory (1997–2026)</title>
+    <title>BSE SENSEX Dynamic Growth Simulator | Monthly Trajectory (1997–2026)</title>
     <meta name="description" content="Dynamic monthly evolution of the BSE SENSEX from July 1997 to October 2026 against expanding Geometric Brownian Motion (GBM) diffusion.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,25 +12,26 @@
     
     <style>
         :root {
-            --bg-void: #05070c;
-            --bg-canvas: #090d16;
-            --bg-panel: #0e1424;
-            --bg-card: rgba(18, 26, 44, 0.7);
+            --bg-void: #f8fafc;
+            --bg-canvas: #ffffff;
+            --bg-panel: #ffffff;
+            --bg-card: #ffffff;
             
-            --border-subtle: rgba(255, 255, 255, 0.07);
-            --border-glow: rgba(0, 245, 155, 0.25);
+            --border-subtle: #e2e8f0;
+            --border-highlight: #cbd5e1;
             
-            /* Signature Palette: Cyber Mint & Electric Violet */
-            --color-sensex: #00f59b;
-            --color-sensex-glow: rgba(0, 245, 155, 0.35);
-            --color-gbm-path: rgba(139, 92, 246, 0.15);
-            --color-gbm-band: rgba(124, 58, 237, 0.22);
-            --color-gbm-median: #a78bfa;
-            --color-crimson: #ff3366;
-            --color-gold: #fbbf24;
+            /* Clean White Palette: Emerald Jade & Royal Violet */
+            --color-sensex: #059669;
+            --color-sensex-glow: rgba(5, 150, 105, 0.2);
+            --color-gbm-path: rgba(124, 58, 237, 0.12);
+            --color-gbm-band: rgba(124, 58, 237, 0.16);
+            --color-gbm-median: #7c3aed;
+            --color-crimson: #e11d48;
+            --color-gold: #d97706;
+            --color-blue: #2563eb;
             
-            --text-title: #ffffff;
-            --text-body: #cbd5e1;
+            --text-title: #0f172a;
+            --text-body: #334155;
             --text-muted: #64748b;
             
             --font-ui: 'Outfit', sans-serif;
@@ -48,25 +49,25 @@
             color: var(--text-body);
             font-family: var(--font-ui);
             min-height: 100vh;
-            padding: 20px 28px;
+            padding: 24px 32px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
             overflow-x: hidden;
         }
 
-        /* Top Bar */
+        /* Top Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
-            padding: 16px 20px;
-            background: linear-gradient(90deg, #0e1424 0%, #111a30 100%);
+            padding: 16px 24px;
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
         .brand {
@@ -76,17 +77,17 @@
         }
 
         .brand-icon {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--color-sensex) 0%, #059669 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px var(--color-sensex-glow);
-            color: #05070c;
+            color: #ffffff;
             font-weight: 800;
-            font-size: 1.25rem;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
         }
 
         .brand-text h1 {
@@ -97,7 +98,7 @@
         }
 
         .brand-text p {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
         }
 
@@ -106,14 +107,14 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            background: rgba(5, 7, 12, 0.7);
-            padding: 8px 16px;
+            background: #f1f5f9;
+            padding: 6px 14px;
             border-radius: 12px;
             border: 1px solid var(--border-subtle);
         }
 
         .ctrl-btn {
-            background: rgba(255, 255, 255, 0.05);
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
             color: var(--text-title);
             width: 36px;
@@ -125,45 +126,49 @@
             cursor: pointer;
             transition: all 0.2s;
             font-size: 0.95rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
         }
 
         .ctrl-btn:hover {
-            background: rgba(0, 245, 155, 0.15);
+            background: #f8fafc;
             border-color: var(--color-sensex);
             color: var(--color-sensex);
         }
 
         .play-master-btn {
             background: var(--color-sensex);
-            color: #05070c;
+            color: #ffffff;
             font-weight: 700;
             width: 40px;
             height: 40px;
             border-radius: 10px;
             border: none;
-            box-shadow: 0 0 15px var(--color-sensex-glow);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
 
         .play-master-btn:hover {
             transform: scale(1.05);
-            background: #22f8a8;
+            background: #047857;
+            color: #ffffff;
         }
 
         .speed-badge {
             font-family: var(--font-code);
             font-size: 0.8rem;
             padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.05);
+            background: #ffffff;
             border-radius: 6px;
             cursor: pointer;
             color: var(--text-muted);
-            border: 1px solid transparent;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s;
         }
 
         .speed-badge.active {
             color: var(--color-sensex);
             border-color: var(--color-sensex);
-            background: rgba(0, 245, 155, 0.1);
+            background: rgba(5, 150, 105, 0.08);
+            font-weight: 700;
         }
 
         /* Month Ticker HUD */
@@ -171,10 +176,11 @@
             display: flex;
             align-items: baseline;
             gap: 8px;
-            background: #090d16;
-            padding: 8px 16px;
+            background: #ffffff;
+            padding: 8px 18px;
             border-radius: 12px;
             border: 1px solid var(--border-subtle);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
 
         .hud-label {
@@ -182,41 +188,41 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--text-muted);
+            font-weight: 600;
         }
 
         .hud-month {
             font-family: var(--font-code);
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--color-sensex);
-            text-shadow: 0 0 12px var(--color-sensex-glow);
-            min-width: 100px;
+            min-width: 105px;
             text-align: center;
         }
 
         /* Live Metrics Cards */
         .metrics-strip {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 14px;
         }
 
         .m-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px);
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: 14px;
-            padding: 14px 18px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
             gap: 4px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
             transition: border-color 0.25s, transform 0.2s;
         }
 
         .m-card:hover {
-            border-color: rgba(0, 245, 155, 0.3);
+            border-color: var(--color-sensex);
             transform: translateY(-2px);
         }
 
@@ -225,7 +231,7 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 3px;
+            width: 4px;
             height: 100%;
             background: var(--card-accent, var(--color-sensex));
         }
@@ -235,11 +241,12 @@
             text-transform: uppercase;
             letter-spacing: 0.06em;
             color: var(--text-muted);
+            font-weight: 600;
         }
 
         .m-val {
             font-family: var(--font-code);
-            font-size: 1.5rem;
+            font-size: 1.55rem;
             font-weight: 700;
             color: var(--text-title);
         }
@@ -251,12 +258,12 @@
 
         /* Hero Chart Stage */
         .stage-card {
-            background: var(--bg-panel);
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: 18px;
             padding: 20px 24px;
             position: relative;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
         }
 
         .stage-header {
@@ -269,8 +276,8 @@
         }
 
         .stage-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.15rem;
+            font-weight: 700;
             color: var(--text-title);
             display: flex;
             align-items: center;
@@ -278,8 +285,8 @@
         }
 
         .live-pulse {
-            width: 8px;
-            height: 8px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
             background: var(--color-sensex);
             box-shadow: 0 0 10px var(--color-sensex);
@@ -298,6 +305,7 @@
             font-size: 0.82rem;
             color: var(--text-muted);
             align-items: center;
+            font-weight: 500;
         }
 
         .legend-tag {
@@ -307,7 +315,7 @@
         }
 
         .tag-line {
-            width: 14px;
+            width: 16px;
             height: 3px;
             border-radius: 2px;
         }
@@ -322,7 +330,7 @@
             width: 100%;
         }
 
-        /* Timeline Scrubber Bar */
+        /* Scrubber Bar */
         .scrubber-zone {
             margin-top: 16px;
             padding-top: 14px;
@@ -337,7 +345,7 @@
             -webkit-appearance: none;
             height: 6px;
             border-radius: 3px;
-            background: #162035;
+            background: #e2e8f0;
             outline: none;
         }
 
@@ -348,7 +356,7 @@
             border-radius: 50%;
             background: var(--color-sensex);
             cursor: pointer;
-            box-shadow: 0 0 12px var(--color-sensex-glow);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
             transition: transform 0.15s;
         }
 
@@ -356,7 +364,7 @@
             transform: scale(1.25);
         }
 
-        /* Secondary Analytics Dock */
+        /* Analytics Dock */
         .analytics-dock {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -370,10 +378,11 @@
         }
 
         .mini-card {
-            background: var(--bg-panel);
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
             padding: 18px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
         }
 
         .mini-header {
@@ -382,15 +391,15 @@
             align-items: center;
             margin-bottom: 12px;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-title);
         }
 
         footer {
             text-align: center;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            padding: 10px 0;
+            padding: 12px 0;
         }
     </style>
 </head>
@@ -402,7 +411,7 @@
             <div class="brand-icon">S</div>
             <div class="brand-text">
                 <h1>BSE SENSEX Dynamic Trajectory</h1>
-                <p>Real-time monthly growth vs stochastic Geometric Brownian Motion (1997–2026)</p>
+                <p>Monthly evolution vs stochastic Geometric Brownian Motion (1997–2026)</p>
             </div>
         </div>
 
@@ -435,9 +444,9 @@
             <div class="m-sub" id="metricNormalized">Base 100.00 pts</div>
         </div>
 
-        <div class="m-card" style="--card-accent: #38bdf8;">
+        <div class="m-card" style="--card-accent: var(--color-blue);">
             <div class="m-label">Compounded Return (CAGR)</div>
-            <div class="m-val" id="metricCagr" style="color:#38bdf8;">0.00%</div>
+            <div class="m-val" id="metricCagr" style="color:var(--color-blue);">0.00%</div>
             <div class="m-sub">Geometric Drift Calibrated</div>
         </div>
 
@@ -466,19 +475,19 @@
             <div class="stage-title">
                 <span class="live-pulse"></span>
                 <span>Monthly Trajectory Expansion (Log Scale)</span>
-                <span style="font-size:0.8rem; color:var(--text-muted); font-weight:400;">— Watching the curve grow from July 1997 to October 2026</span>
+                <span style="font-size:0.82rem; color:var(--text-muted); font-weight:400;">— Real-time compounding from July 1997 to October 2026</span>
             </div>
             <div class="legend-bar">
                 <div class="legend-tag">
                     <div class="tag-line" style="background:var(--color-sensex);"></div>
-                    <span>Realized SENSEX</span>
+                    <span style="color:var(--text-title); font-weight:600;">Realized SENSEX</span>
                 </div>
                 <div class="legend-tag">
-                    <div class="tag-line" style="background:var(--color-gbm-median); border-top:1px dashed #ffffff;"></div>
+                    <div class="tag-line" style="background:var(--color-gbm-median); border-top:1px dashed #7c3aed;"></div>
                     <span>GBM Median Path</span>
                 </div>
                 <div class="legend-tag">
-                    <div class="tag-line" style="background:var(--color-gbm-band); height:6px;"></div>
+                    <div class="tag-line" style="background:rgba(124, 58, 237, 0.3); height:6px;"></div>
                     <span>5–95% Diffusion Cone</span>
                 </div>
             </div>
@@ -490,9 +499,9 @@
 
         <!-- Scrubber -->
         <div class="scrubber-zone">
-            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code);">JUL 1997</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code); font-weight:600;">JUL 1997</span>
             <input type="range" class="range-slider" id="scrubber" min="0" max="352" value="0">
-            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code);">OCT 2026</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-code); font-weight:600;">OCT 2026</span>
         </div>
     </div>
 
@@ -502,7 +511,7 @@
         <div class="mini-card">
             <div class="mini-header">
                 <span>Empirical Return Density vs Gaussian</span>
-                <span style="font-size:0.78rem; color:var(--color-sensex); font-family:var(--font-code);">Leptokurtosis</span>
+                <span style="font-size:0.78rem; color:var(--color-sensex); font-family:var(--font-code); font-weight:600;">Leptokurtosis</span>
             </div>
             <canvas id="distCanvas" height="220"></canvas>
         </div>
@@ -511,7 +520,7 @@
         <div class="mini-card">
             <div class="mini-header">
                 <span>Expanding Excess Kurtosis Evolution</span>
-                <span style="font-size:0.78rem; color:var(--color-crimson); font-family:var(--font-code);">Fat-Tail Accumulator</span>
+                <span style="font-size:0.78rem; color:var(--color-crimson); font-family:var(--font-code); font-weight:600;">Fat-Tail Accumulator</span>
             </div>
             <canvas id="kurtCanvas" height="220"></canvas>
         </div>
@@ -526,7 +535,7 @@
         let db = null;
         let curMonth = 0;
         let isPlaying = true;
-        let playSpeed = 1; // 1x = ~200ms per month, 2x = 100ms, 5x = 40ms
+        let playSpeed = 1;
         let animTimer = null;
 
         // Fetch monthly data
@@ -591,7 +600,6 @@
                     document.getElementById('scrubber').value = curMonth;
                     updateFrame();
                 } else {
-                    // Loop or pause
                     pausePlayback();
                 }
             }, intervalMs);
@@ -650,7 +658,7 @@
         }
 
         // ========================================================
-        // Main Growth Canvas: SENSEX growing month-by-month
+        // Main Growth Canvas (Clean White Background)
         // ========================================================
         function drawGrowthCanvas() {
             const canvas = document.getElementById('growthCanvas');
@@ -664,7 +672,9 @@
             const H = rect.height;
             const pad = { top: 25, right: 35, bottom: 35, left: 55 };
 
-            ctx.clearRect(0, 0, W, H);
+            // Pure White Canvas Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
 
             const total = db.total_months;
             const minLog = Math.log10(50);
@@ -679,9 +689,9 @@
                 return H - pad.bottom - ((logV - minLog) / (maxLog - minLog)) * (H - pad.top - pad.bottom);
             }
 
-            // Grid lines
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.lineWidth = 0.8;
+            // Light Grid lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1.0;
             ctx.fillStyle = '#64748b';
             ctx.font = '10px JetBrains Mono';
 
@@ -694,7 +704,7 @@
                 ctx.fillText(tick.toLocaleString(), 10, y + 3);
             });
 
-            // Date Ticks across bottom
+            // Date Ticks
             for (let i = 0; i < total; i += 60) {
                 const x = getX(i);
                 ctx.beginPath();
@@ -704,10 +714,10 @@
                 ctx.fillText(db.timeline[i].month.slice(-4), x - 12, H - pad.bottom + 18);
             }
 
-            // 1. GBM Background Diffusion Paths up to curMonth
+            // 1. GBM Background Diffusion Paths
             ctx.lineWidth = 0.8;
             for (let p = 0; p < db.gbm.paths.length; p++) {
-                ctx.strokeStyle = 'rgba(139, 92, 246, 0.07)';
+                ctx.strokeStyle = 'rgba(124, 58, 237, 0.08)';
                 ctx.beginPath();
                 for (let i = 0; i <= curMonth; i++) {
                     const x = getX(i);
@@ -718,7 +728,7 @@
                 ctx.stroke();
             }
 
-            // 2. GBM 5–95% Expanding Confidence Ribbon
+            // 2. GBM 5–95% Diffusion Cone
             if (curMonth > 1) {
                 ctx.beginPath();
                 for (let i = 0; i <= curMonth; i++) {
@@ -733,13 +743,13 @@
                     ctx.lineTo(x, y);
                 }
                 ctx.closePath();
-                ctx.fillStyle = 'rgba(124, 58, 237, 0.22)';
+                ctx.fillStyle = 'rgba(124, 58, 237, 0.12)';
                 ctx.fill();
 
                 // GBM Median Line
                 ctx.beginPath();
-                ctx.strokeStyle = '#a78bfa';
-                ctx.lineWidth = 1.6;
+                ctx.strokeStyle = '#7c3aed';
+                ctx.lineWidth = 1.8;
                 ctx.setLineDash([4, 4]);
                 for (let i = 0; i <= curMonth; i++) {
                     const x = getX(i);
@@ -751,12 +761,12 @@
                 ctx.setLineDash([]);
             }
 
-            // 3. Realized SENSEX Trajectory Growing Month by Month!
+            // 3. Realized SENSEX Trajectory
             ctx.beginPath();
-            ctx.strokeStyle = '#00f59b';
+            ctx.strokeStyle = '#059669';
             ctx.lineWidth = 2.6;
-            ctx.shadowColor = 'rgba(0, 245, 155, 0.45)';
-            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(5, 150, 105, 0.25)';
+            ctx.shadowBlur = 6;
 
             for (let i = 0; i <= curMonth; i++) {
                 const x = getX(i);
@@ -765,7 +775,7 @@
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
-            ctx.shadowBlur = 0; // reset shadow
+            ctx.shadowBlur = 0;
 
             // 4. Moving Head Pulse Dot
             const headX = getX(curMonth);
@@ -773,18 +783,18 @@
 
             ctx.beginPath();
             ctx.arc(headX, headY, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#059669';
             ctx.fill();
 
             ctx.beginPath();
-            ctx.arc(headX, headY, 12, 0, Math.PI * 2);
-            ctx.strokeStyle = '#00f59b';
+            ctx.arc(headX, headY, 11, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(5, 150, 105, 0.4)';
             ctx.lineWidth = 2;
             ctx.stroke();
         }
 
         // ========================================================
-        // Secondary Chart 1: Return Density
+        // Secondary Chart 1: Return Density (White Mode)
         // ========================================================
         function drawDistCanvas() {
             const canvas = document.getElementById('distCanvas');
@@ -798,7 +808,8 @@
             const H = rect.height;
             const pad = { top: 15, right: 20, bottom: 25, left: 35 };
 
-            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
 
             const bins = db.distribution.bins;
             const dens = db.distribution.density;
@@ -815,8 +826,8 @@
             }
 
             // Grid
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.lineWidth = 0.8;
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1.0;
             [-4, -2, 0, 2, 4].forEach(tick => {
                 const x = getX(tick);
                 ctx.beginPath();
@@ -830,7 +841,7 @@
 
             // Bars
             const barW = (W - pad.left - pad.right) / bins.length;
-            ctx.fillStyle = 'rgba(0, 245, 155, 0.6)';
+            ctx.fillStyle = 'rgba(5, 150, 105, 0.65)';
             for (let i = 0; i < bins.length; i++) {
                 const x = getX(bins[i]) - barW / 2;
                 const y = getY(dens[i]);
@@ -839,8 +850,8 @@
 
             // Normal Curve
             ctx.beginPath();
-            ctx.strokeStyle = '#a78bfa';
-            ctx.lineWidth = 1.8;
+            ctx.strokeStyle = '#7c3aed';
+            ctx.lineWidth = 2.0;
             for (let v = xMin; v <= xMax; v += 0.1) {
                 const z = (v - db.distribution.mean) / db.distribution.std;
                 const p = (1 / (db.distribution.std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
@@ -853,7 +864,7 @@
         }
 
         // ========================================================
-        // Secondary Chart 2: Expanding Kurtosis Evolution
+        // Secondary Chart 2: Excess Kurtosis (White Mode)
         // ========================================================
         function drawKurtCanvas() {
             const canvas = document.getElementById('kurtCanvas');
@@ -867,7 +878,8 @@
             const H = rect.height;
             const pad = { top: 15, right: 20, bottom: 25, left: 35 };
 
-            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
 
             const total = db.total_months;
             const maxKurt = 16.0;
@@ -879,8 +891,8 @@
                 return H - pad.bottom - (Math.max(0, k) / maxKurt) * (H - pad.top - pad.bottom);
             }
 
-            // Normal baseline (Kurt = 0)
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            // Normal line
+            ctx.strokeStyle = '#cbd5e1';
             ctx.setLineDash([3, 3]);
             ctx.beginPath();
             ctx.moveTo(pad.left, getY(0));
@@ -891,10 +903,10 @@
             ctx.font = '9px JetBrains Mono';
             ctx.fillText('Normal = 0', pad.left + 6, getY(0) - 5);
 
-            // Expanding kurtosis path
+            // Path
             if (curMonth > 10) {
                 ctx.beginPath();
-                ctx.strokeStyle = '#ff3366';
+                ctx.strokeStyle = '#e11d48';
                 ctx.lineWidth = 2.0;
                 for (let i = 10; i <= curMonth; i++) {
                     const x = getX(i);
@@ -904,12 +916,11 @@
                 }
                 ctx.stroke();
 
-                // Current head point
                 const hX = getX(curMonth);
                 const hY = getY(db.timeline[curMonth].kurt);
                 ctx.beginPath();
                 ctx.arc(hX, hY, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#ff3366';
+                ctx.fillStyle = '#e11d48';
                 ctx.fill();
             }
         }
