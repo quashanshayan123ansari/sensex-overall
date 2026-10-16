@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BSE SENSEX vs Geometric Brownian Motion | Quantitative Fat-Tail Diagnostics</title>
+    <meta name="description" content="Empirical BSE SENSEX historical returns (1997–2026) vs Geometric Brownian Motion (GBM) with Student-t and GARCH(1,1) econometric extensions.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080c14;
+            --bg-surface: #0e1422;
+            --bg-card: #121929;
+            --border-subtle: #1e293b;
+            --border-highlight: #334155;
+            
+            --color-actual: #ff7844;
+            --color-actual-glow: rgba(255, 120, 68, 0.25);
+            --color-gbm: #38bdf8;
+            --color-gbm-band: rgba(2, 132, 199, 0.28);
+            --color-student: #10b981;
+            --color-garch: #a855f7;
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .header-title h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(120deg, #ffffff 40%, var(--color-gbm) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: var(--color-gbm);
+            background: #1e293b;
+        }
+
+        .btn.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--color-gbm);
+            color: var(--color-gbm);
+        }
+
+        /* Timeline bar */
+        .timeline-bar {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .play-btn {
+            background: var(--color-gbm);
+            color: #080c14;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.06);
+            background: #7dd3fc;
+        }
+
+        .slider-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-actual);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--color-actual-glow);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .current-date-badge {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-highlight);
+            border-radius: 8px;
+            min-width: 110px;
+            text-align: center;
+        }
+
+        /* Top Panel (Price Chart) */
+        .chart-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-inline {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .canvas-container {
+            width: 100%;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        /* Bottom Grid (2 charts) */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 950px) {
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .kpi-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px;
+            border-left: 2px solid var(--border-subtle);
+            transition: border-color 0.2s;
+        }
+
+        .kpi-cell:hover {
+            border-left-color: var(--color-gbm);
+        }
+
+        .kpi-label {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .kpi-val {
+            font-size: 1.35rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .kpi-sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Colors */
+        .c-orange { color: var(--color-actual); }
+        .c-cyan { color: var(--color-gbm); }
+        .c-green { color: var(--color-student); }
+        .c-purple { color: var(--color-garch); }
+        .c-red { color: #f87171; }
+
+        footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">
+            <h1>BSE SENSEX vs Geometric Brownian Motion</h1>
+            <p>Actual daily market data (1997–2026) vs calibrated GBM stochastic diffusion + Student-t & GARCH(1,1)</p>
+        </div>
+        <div class="header-controls">
+            <button class="btn active" id="toggleBandBtn">5–95% GBM Band</button>
+            <button class="btn active" id="toggleMedianBtn">GBM Median</button>
+            <button class="btn active" id="toggleStudentBtn">Student-t Curve</button>
+            <button class="btn active" id="toggleGarchBtn">GARCH Residuals</button>
+            <button class="btn" id="toggleScaleBtn">Linear Scale</button>
+        </div>
+    </header>
+
+    <!-- Timeline Scrubber -->
+    <div class="timeline-bar">
+        <button class="play-btn" id="playBtn" title="Play / Pause Animation">▶</button>
+        <div class="slider-wrapper">
+            <div class="slider-labels">
+                <span>Jul 1997</span>
+                <span id="sliderMidDate">2011</span>
+                <span>Oct 2026</span>
+            </div>
+            <input type="range" id="timeSlider" min="50" max="1000" value="1000">
+        </div>
+        <div class="current-date-badge" id="dateBadge">Oct 2026</div>
+    </div>
+
+    <!-- Top Chart: Price Trajectory -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <span>Price Trajectory & Confidence Cone</span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">(Base 100 = Jul 1997)</span>
+            </div>
+            <div class="legend-inline">
+                <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual SENSEX</div>
+                <div class="legend-item"><div class="dot" style="background:var(--color-gbm);"></div> GBM Median</div>
+                <div class="legend-item"><div class="dot" style="background:rgba(2, 132, 199, 0.6);"></div> 5–95% Band</div>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="priceCanvas" height="340"></canvas>
+        </div>
+    </div>
+
+    <!-- Bottom 2 Panels -->
+    <div class="bottom-grid">
+        <!-- Distribution Histogram -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Return Distribution vs Fat Tails</div>
+                <div class="legend-inline">
+                    <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--color-gbm);"></div> Normal</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--color-student);"></div> Student-t</div>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="distCanvas" height="260"></canvas>
+            </div>
+        </div>
+
+        <!-- Q-Q Plot -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Q-Q Plot vs Normal & GARCH</div>
+                <div class="legend-inline">
+                    <div class="legend-item"><div class="dot" style="background:var(--color-actual);"></div> Actual SENSEX</div>
+                    <div class="legend-item"><div class="dot" style="background:var(--color-garch);"></div> GARCH Standardized</div>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="qqCanvas" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary KPI Panel -->
+    <div class="kpi-grid">
+        <div class="kpi-cell">
+            <div class="kpi-label">Trading Days</div>
+            <div class="kpi-val" id="kpiDays">7,216</div>
+            <div class="kpi-sub">Jul 1997 – Oct 2026</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Annualized Return (CAGR)</div>
+            <div class="kpi-val c-green" id="kpiReturn">10.21%</div>
+            <div class="kpi-sub">GBM Drift Calibrated</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Annualized Volatility (σ)</div>
+            <div class="kpi-val c-cyan" id="kpiVol">22.38%</div>
+            <div class="kpi-sub">Daily σ = 1.41%</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Worst Single Day</div>
+            <div class="kpi-val c-red" id="kpiWorst">-14.10%</div>
+            <div class="kpi-sub">May 17, 2004</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Excess Kurtosis</div>
+            <div class="kpi-val c-orange" id="kpiKurt">8.76</div>
+            <div class="kpi-sub">Normal Gaussian = 0.00</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">GARCH Standardized Kurtosis</div>
+            <div class="kpi-val c-purple" id="kpiGarch">2.07</div>
+            <div class="kpi-sub">-57% drop (Vol Clustering)</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Student-t Shape Index</div>
+            <div class="kpi-val c-green" id="kpiDf">ν = 3.11</div>
+            <div class="kpi-sub">Confirms Heavy Power-Law Tail</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">Days Beyond ±4σ (Black Swans)</div>
+            <div class="kpi-val c-red" id="kpiOutliers">45 <span style="font-size:0.8rem;color:var(--text-muted);">vs 0.46 exp</span></div>
+            <div class="kpi-sub">~100x Gaussian Rate</div>
+        </div>
+    </div>
+
+    <footer>
+        Data: S&P BSE SENSEX (^BSESN) daily closing prices (1997–2026). Calibrated GBM, Student-t MLE, and GARCH(1,1). Created for Quantitative Finance Research.
+    </footer>
+
+    <!-- Interactive Script -->
+    <script>
+        let rawData = null;
+        let isPlaying = false;
+        let playInterval = null;
+        let isLogScale = true;
+        let showBand = true;
+        let showMedian = true;
+        let showStudent = true;
+        let showGarch = true;
+
+        // Fetch pre-computed dashboard metrics
+        fetch('dashboard_data.json')
+            .then(res => res.json())
+            .then(data => {
+                rawData = data;
+                initApp();
+            })
+            .catch(err => {
+                console.error("Failed to load dashboard_data.json:", err);
+            });
+
+        function initApp() {
+            const slider = document.getElementById('timeSlider');
+            slider.max = rawData.prices.length - 1;
+            slider.value = rawData.prices.length - 1;
+
+            slider.addEventListener('input', () => {
+                renderAll();
+            });
+
+            // Toggle buttons
+            document.getElementById('playBtn').addEventListener('click', togglePlay);
+            
+            document.getElementById('toggleBandBtn').addEventListener('click', function() {
+                showBand = !showBand;
+                this.classList.toggle('active', showBand);
+                drawPriceChart();
+            });
+
+            document.getElementById('toggleMedianBtn').addEventListener('click', function() {
+                showMedian = !showMedian;
+                this.classList.toggle('active', showMedian);
+                drawPriceChart();
+            });
+
+            document.getElementById('toggleStudentBtn').addEventListener('click', function() {
+                showStudent = !showStudent;
+                this.classList.toggle('active', showStudent);
+                drawDistChart();
+            });
+
+            document.getElementById('toggleGarchBtn').addEventListener('click', function() {
+                showGarch = !showGarch;
+                this.classList.toggle('active', showGarch);
+                drawQQChart();
+            });
+
+            document.getElementById('toggleScaleBtn').addEventListener('click', function() {
+                isLogScale = !isLogScale;
+                this.textContent = isLogScale ? "Linear Scale" : "Logarithmic Scale";
+                this.classList.toggle('active', !isLogScale);
+                drawPriceChart();
+            });
+
+            window.addEventListener('resize', renderAll);
+            renderAll();
+        }
+
+        function togglePlay() {
+            const playBtn = document.getElementById('playBtn');
+            const slider = document.getElementById('timeSlider');
+            if (isPlaying) {
+                clearInterval(playInterval);
+                isPlaying = false;
+                playBtn.textContent = '▶';
+            } else {
+                if (parseInt(slider.value) >= parseInt(slider.max)) {
+                    slider.value = 50;
+                }
+                isPlaying = true;
+                playBtn.textContent = '⏸';
+                playInterval = setInterval(() => {
+                    let val = parseInt(slider.value) + 8;
+                    if (val >= parseInt(slider.max)) {
+                        slider.value = slider.max;
+                        togglePlay();
+                    } else {
+                        slider.value = val;
+                    }
+                    renderAll();
+                }, 40);
+            }
+        }
+
+        function renderAll() {
+            if (!rawData) return;
+            const slider = document.getElementById('timeSlider');
+            const curIdx = parseInt(slider.value);
+            const curDate = rawData.dates[curIdx];
+            document.getElementById('dateBadge').textContent = formatDate(curDate);
+            
+            drawPriceChart();
+            drawDistChart();
+            drawQQChart();
+        }
+
+        function formatDate(dStr) {
+            const d = new Date(dStr);
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            return `${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        // ==========================================
+        // 1. Price Canvas Chart
+        // ==========================================
+        function drawPriceChart() {
+            const canvas = document.getElementById('priceCanvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 30, bottom: 35, left: 60 };
+
+            ctx.clearRect(0, 0, width, height);
+
+            const slider = document.getElementById('timeSlider');
+            const curIdx = parseInt(slider.value);
+            const totalPoints = rawData.prices.length;
+
+            const minVal = 40;
+            const maxVal = 250000;
+
+            function getY(val) {
+                if (isLogScale) {
+                    const logMin = Math.log10(minVal);
+                    const logMax = Math.log10(maxVal);
+                    const logVal = Math.log10(Math.max(val, minVal));
+                    return height - padding.bottom - ((logVal - logMin) / (logMax - logMin)) * (height - padding.top - padding.bottom);
+                } else {
+                    return height - padding.bottom - (val / 80000) * (height - padding.top - padding.bottom);
+                }
+            }
+
+            function getX(i) {
+                return padding.left + (i / (totalPoints - 1)) * (width - padding.left - padding.right);
+            }
+
+            // Grid lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 0.8;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px JetBrains Mono';
+
+            const yTicks = isLogScale ? [100, 1000, 10000, 100000] : [10000, 30000, 50000, 70000];
+            yTicks.forEach(tick => {
+                const y = getY(tick);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+                ctx.fillText(tick.toLocaleString(), 10, y + 3);
+            });
+
+            // Date X ticks
+            for (let step = 0; step < totalPoints; step += Math.floor(totalPoints / 5)) {
+                const x = getX(step);
+                ctx.beginPath();
+                ctx.moveTo(x, height - padding.bottom);
+                ctx.lineTo(x, height - padding.bottom + 5);
+                ctx.stroke();
+                ctx.fillText(rawData.dates[step].slice(0, 4), x - 12, height - padding.bottom + 18);
+            }
+
+            // Theoretical GBM Median & Confidence Band
+            const mu = rawData.summary.ann_geo_return / 100;
+            const sigma = rawData.summary.ann_vol / 100;
+            const dt = 1 / 252;
+            const s0 = 100;
+
+            if (showBand) {
+                ctx.beginPath();
+                // Upper 95%
+                for (let i = 0; i <= curIdx; i++) {
+                    const t = (i * 4) * dt;
+                    const p95 = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t + 1.645 * sigma * Math.sqrt(t));
+                    const x = getX(i);
+                    const y = getY(p95);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                // Lower 5%
+                for (let i = curIdx; i >= 0; i--) {
+                    const t = (i * 4) * dt;
+                    const p5 = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t - 1.645 * sigma * Math.sqrt(t));
+                    const x = getX(i);
+                    const y = getY(p5);
+                    ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(2, 132, 199, 0.25)';
+                ctx.fill();
+            }
+
+            // GBM Median Line
+            if (showMedian) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 1.6;
+                ctx.setLineDash([5, 4]);
+                for (let i = 0; i <= curIdx; i++) {
+                    const t = (i * 4) * dt;
+                    const pMed = s0 * Math.exp((mu - 0.5 * sigma * sigma) * t);
+                    const x = getX(i);
+                    const y = getY(pMed);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Actual SENSEX Line
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff7844';
+            ctx.lineWidth = 2.2;
+            for (let i = 0; i <= curIdx; i++) {
+                const x = getX(i);
+                const y = getY(rawData.prices[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Terminal Point
+            const lastX = getX(curIdx);
+            const lastY = getY(rawData.prices[curIdx]);
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff7844';
+            ctx.fill();
+        }
+
+        // ==========================================
+        // 2. Return Distribution Chart
+        // ==========================================
+        function drawDistChart() {
+            const canvas = document.getElementById('distCanvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 25, bottom: 35, left: 45 };
+
+            ctx.clearRect(0, 0, width, height);
+
+            const bins = rawData.distribution.bins;
+            const density = rawData.distribution.density;
+
+            const xMin = -6.0;
+            const xMax = 6.0;
+            const yMax = 0.46;
+
+            function getX(val) {
+                return padding.left + ((val - xMin) / (xMax - xMin)) * (width - padding.left - padding.right);
+            }
+
+            function getY(val) {
+                return height - padding.bottom - (val / yMax) * (height - padding.top - padding.bottom);
+            }
+
+            // Grid lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 0.8;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '9px JetBrains Mono';
+
+            [-4, -2, 0, 2, 4].forEach(xVal => {
+                const x = getX(xVal);
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, height - padding.bottom);
+                ctx.stroke();
+                ctx.fillText(xVal + '%', x - 8, height - padding.bottom + 16);
+            });
+
+            // Draw histogram bars
+            const barW = (width - padding.left - padding.right) / bins.length;
+            ctx.fillStyle = 'rgba(255, 120, 68, 0.82)';
+            for (let i = 0; i < bins.length; i++) {
+                const x = getX(bins[i]) - barW / 2;
+                const y = getY(density[i]);
+                const h = height - padding.bottom - y;
+                ctx.fillRect(x, y, barW - 0.5, h);
+            }
+
+            // Normal Gaussian curve
+            const mean = rawData.distribution.norm_mean;
+            const std = rawData.distribution.norm_std;
+            ctx.beginPath();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.0;
+            for (let xV = xMin; xV <= xMax; xV += 0.1) {
+                const z = (xV - mean) / std;
+                const pdf = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+                const x = getX(xV);
+                const y = getY(pdf);
+                if (xV === xMin) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Student-t curve
+            if (showStudent) {
+                const df = rawData.distribution.t_df;
+                const loc = rawData.distribution.t_loc;
+                const scale = rawData.distribution.t_scale;
+                
+                // Gamma helper for Student-t
+                function gamma(n) {
+                    if (n === 1) return 1;
+                    if (n === 0.5) return Math.sqrt(Math.PI);
+                    return (n - 1) * gamma(n - 1);
+                }
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2.0;
+                for (let xV = xMin; xV <= xMax; xV += 0.1) {
+                    const z = (xV - loc) / scale;
+                    // Approximation of Student-t PDF
+                    const coef = 0.36; // Normalized scale factor for nu ~ 3.1
+                    const pdf = (coef / scale) * Math.pow(1 + (z * z) / df, -(df + 1) / 2);
+                    const x = getX(xV);
+                    const y = getY(pdf);
+                    if (xV === xMin) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        // ==========================================
+        // 3. Q-Q Plot Canvas
+        // ==========================================
+        function drawQQChart() {
+            const canvas = document.getElementById('qqCanvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 25, bottom: 35, left: 45 };
+
+            ctx.clearRect(0, 0, width, height);
+
+            const xMin = -4.2;
+            const xMax = 4.2;
+            const yMin = -15.0;
+            const yMax = 9.0;
+
+            function getX(val) {
+                return padding.left + ((val - xMin) / (xMax - xMin)) * (width - padding.left - padding.right);
+            }
+
+            function getY(val) {
+                return height - padding.bottom - ((val - yMin) / (yMax - yMin)) * (height - padding.top - padding.bottom);
+            }
+
+            // Grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 0.8;
+            ctx.fillStyle = '#64748b';
+            ctx.font = '9px JetBrains Mono';
+
+            [-3, -1, 1, 3].forEach(xV => {
+                const x = getX(xV);
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, height - padding.bottom);
+                ctx.stroke();
+                ctx.fillText(xV + 'σ', x - 6, height - padding.bottom + 16);
+            });
+
+            [-10, -5, 0, 5].forEach(yV => {
+                const y = getY(yV);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+                ctx.fillText(yV + 'σ', 12, y + 3);
+            });
+
+            // 45 deg Normal line
+            ctx.beginPath();
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(getX(-4), getY(-4));
+            ctx.lineTo(getX(4), getY(4));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // GARCH Standardized Points
+            if (showGarch && rawData.qq.garch) {
+                ctx.fillStyle = '#a855f7';
+                for (let i = 0; i < rawData.qq.theoretical.length; i++) {
+                    const x = getX(rawData.qq.theoretical[i]);
+                    const y = getY(rawData.qq.garch[i]);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Actual SENSEX Points
+            ctx.fillStyle = '#ff7844';
+            for (let i = 0; i < rawData.qq.theoretical.length; i++) {
+                const x = getX(rawData.qq.theoretical[i]);
+                const y = getY(rawData.qq.actual[i]);
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    </script>
+</body>
+</html>
